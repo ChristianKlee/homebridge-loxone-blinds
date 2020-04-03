@@ -19,7 +19,7 @@ module.exports = function(homebridge) {
     Utility.addSupportTo(ItemFactory.AbstractItem, Accessory);
         //All other items are child of the abstractItem
         Utility.addSupportTo(ItemFactory.Jalousie, ItemFactory.AbstractItem);
-    homebridge.registerPlatform("homebridge-loxoneWs", "LoxoneWs", LoxPlatform);
+    homebridge.registerPlatform("homebridge-loxoneBlinds", "LoxoneBlinds", LoxPlatform);
 };
 
 // Platform constructor
