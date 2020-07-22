@@ -1,8 +1,6 @@
-"use strict";
+const request = require("request");
 
-var request = require("request");
-
-var BlindsItem = function(widget,platform,homebridge) {
+const BlindsItem = function(widget,platform,homebridge) {
 
     this.platform = platform;
     this.uuidAction = widget.uuidAction; //to control a dimmer, use the uuidAction
@@ -29,7 +27,7 @@ BlindsItem.prototype.initListener = function() {
 
 BlindsItem.prototype.callBack = function(value) {
     //function that gets called by the registered ws listener
-    console.log("Got new state for blind " + value);
+    //console.log("Got new state for blind " + value);
     this.gotCallBack = true
 
     //incomign values from blinds are decimal (0 - 1)
@@ -48,8 +46,9 @@ BlindsItem.prototype.callBack = function(value) {
     }
 
     //define states for Homekit
-    var delta = Math.abs(parseInt(value) - this.targetPosition),
-        ps = this.homebridge.hap.Characteristic.PositionState.INCREASING;
+    const delta = Math.abs(parseInt(value) - this.targetPosition);
+
+    let ps = this.homebridge.hap.Characteristic.PositionState.INCREASING;
     if (delta < 3) {
         //blinds don't always stop at the exact position, so take a margin of 3% here
         ps = this.homebridge.hap.Characteristic.PositionState.STOPPED;
@@ -64,19 +63,18 @@ BlindsItem.prototype.callBack = function(value) {
         .getCharacteristic(this.homebridge.hap.Characteristic.PositionState)
         .updateValue(ps);
 
-     this.otherService
-        .getCharacteristic(this.homebridge.hap.Characteristic.TargetPosition)
-        .updateValue(parseInt(this.targetPosition));
+    this.otherService
+       .getCharacteristic(this.homebridge.hap.Characteristic.TargetPosition)
+       .updateValue(parseInt(this.targetPosition));
 
     this.otherService
         .getCharacteristic(this.homebridge.hap.Characteristic.CurrentPosition)
         .updateValue(value);
-
 };
 
 BlindsItem.prototype.getOtherServices = function() {
 
-    var otherService = new this.homebridge.hap.Service.WindowCovering();
+    const otherService = new this.homebridge.hap.Service.WindowCovering();
 
     otherService.getCharacteristic(this.homebridge.hap.Characteristic.CurrentPosition)
         .on('get', this.getItemCurrentPosition.bind(this))
@@ -111,24 +109,24 @@ BlindsItem.prototype.setItem = function(value, callback) {
     this.gotCallBack = false;
 
     //sending new state (pct closed) to loxone
-    var self = this;
+    const self = this;
 
     //set a flag that we're in control. this way we'll know if the action is coming from Homekit or from external actor (eg Loxone app)
     //this flag is removed after 20 seconds (increase if you have really long or slow blinds ;)
     this.inControl =true;
-    setTimeout(function(){ self.inControl = false; }, 20000);
+    setTimeout(() => { self.inControl = false; }, 20000);
 
     this.startedPosition = this.currentPosition;
     this.targetPosition = parseInt(value);
 
-    var command = 0;
+    let command = 0;
     if (typeof value === 'boolean') {
         command = value ? 'FullUp' : 'FullDown';
     } else {
         //reverse again the value
-        command = "ManualPosition/" + (100 - value);
+        command = `ManualPosition/${100 - value}`;
     }
-    this.log("[blinds] iOS - send message to " + this.name + ": " + command);
+    this.log(`[blinds] iOS - send message to ${this.name}: ${command}`);
     this.platform.ws.sendCommand(this.uuidAction, command);
     callback();
 
@@ -143,7 +141,7 @@ BlindsItem.prototype.setItem = function(value, callback) {
             }
             self.platform.ws.sendCommand(self.uuidAction, command); 
         }
-    }, 2500);
+    }, 3000);
 };
 
 module.exports = BlindsItem;
