@@ -38,7 +38,7 @@ moduleexports.Factory.prototype.parseSitemap = function(jsonSitemap) {
             //process additional attributes
             this.itemList[key] = moduleexports.Factory.prototype.checkCustomAttrs(this, key, this.platform, this.catList);
 
-            if (!(this.itemList[key].type in expmoduleexportsorts)){
+            if (!(this.itemList[key].type in moduleexports)){
                 continue;
             }
 
